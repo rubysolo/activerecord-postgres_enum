@@ -30,7 +30,14 @@ module ActiveRecord
       unless ActiveRecord::PostgresEnum.rails_7?
         def prepare_column_options(column)
           spec = super
-          spec[:enum_type] ||= "\"#{column.sql_type}\"" if column.enum?
+
+          if column.enum?
+            spec[:enum_type] ||= "\"#{column.sql_type}\""
+            if column.array
+              spec[:default] = @connection.quote(column.default)
+            end
+          end
+
           spec
         end
       end
